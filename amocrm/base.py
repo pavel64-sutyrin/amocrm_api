@@ -233,7 +233,7 @@ class _BaseAmoManager(six.with_metaclass(ABCMeta)):
                 pass
         return response
 
-    def _request(self, method, data=None, headers=None, modified_since=None):
+    def _request(self, method, data=None, headers=None, modified_since=None, **kwargs):
         if not self.is_auth:
             self.auth()
         path = self._get_path(method)
@@ -249,6 +249,8 @@ class _BaseAmoManager(six.with_metaclass(ABCMeta)):
             data[0].setdefault(_time, int(time()))
         if container is not None:
             data = self._create_container(container, data)
+
+        data.update(kwargs)
 
         retry = 3
         while True:
