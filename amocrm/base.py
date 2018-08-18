@@ -196,16 +196,21 @@ class _BaseAmoManager(six.with_metaclass(ABCMeta)):
         logger.debug('Data: %s \n Params: %s' % (data, params))
         resp = self._session.request(method, self._url(path), data=json.dumps(data), params=params,
                                      headers=headers, **_req_params)
-        logger.debug('Url: %s', resp.url)
+
+        try:
+            res = resp.json()
+            logger.debug('Response: \n{}'.format(json.dumps(res, indent=4, ensure_ascii=False)))
+        except ValueError:
+            res = resp.content
+            logger.debug('Response: {}'.format(res))
+
         if not resp.ok:
             logger.error('Something went wrong')
             if resp.status_code in (401, 403):
                 raise AmoAuthException(resp)
             raise AmoResponseException(resp)
-        try:
-            return resp.json()
-        except ValueError:
-            return resp.content
+
+        return res
 
     def _create_container(self, container, data):
         name = self.container_name
